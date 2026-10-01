@@ -85,7 +85,11 @@ builder.Services.Configure<ServiceConfig>(config =>
 builder.Services.AddBlazor(builder.Configuration);
 
 builder.Services.AddMetronome();
-builder.AddSeqEndpoint(connectionName: "seq");
+
+if (builder.Configuration.GetValue<bool>("Seq:Enabled"))
+{
+    builder.AddSeqEndpoint(connectionName: "seq");
+}
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
