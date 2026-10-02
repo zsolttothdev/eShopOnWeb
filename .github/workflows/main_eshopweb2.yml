@@ -23,17 +23,20 @@ jobs:
         with:
           dotnet-version: '10.x'
 
-      - name: Build with dotnet
-        run: dotnet build --configuration Release
+#      - name: Build with dotnet
+#        run: dotnet build "./src/Web/Web.csproj" --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp"
+        run: dotnet publish "./src/Web/Web.csproj" -c Release -o "./src/Web/Release"
+
+      - name: List publish output
+        run: dir "./src/Web/Release"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
-          path: ${{env.DOTNET_ROOT}}/myapp
+          path: ./src/Web/Release
 
   deploy:
     runs-on: windows-latest
@@ -47,6 +50,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: .net-app
+          path: ./publish
       
       - name: Login to Azure
         uses: azure/login@v2
@@ -55,11 +59,19 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_23A986AB7AE444B6A2FC0C603B7CEA3A }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_E7F99288EB134BF897B669E43D83662B }}
 
+      - name: Show deployment files
+        shell: powershell
+        run: |
+          Write-Host "CURRENT DIRECTORY:"
+          Get-Location
+          Write-Host "FILES:"
+          Get-ChildItem ./publish -File | Select-Object Name
+
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'eShopWeb2'
           slot-name: 'Production'
-          package: .
+          package: ./publish
           
