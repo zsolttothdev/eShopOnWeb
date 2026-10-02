@@ -39,10 +39,21 @@ builder.Services.AddJwtAuthentication();
 
 const string CORS_POLICY = "CorsPolicy";
 
-var configSection = builder.Configuration.GetRequiredSection(BaseUrlConfiguration.CONFIG_NAME);
-builder.Services.Configure<BaseUrlConfiguration>(configSection);
-var baseUrlConfig = configSection.Get<BaseUrlConfiguration>();
-builder.Services.AddCorsPolicy(CORS_POLICY, baseUrlConfig!);
+//var configSection = builder.Configuration.GetRequiredSection(BaseUrlConfiguration.CONFIG_NAME);
+//builder.Services.Configure<BaseUrlConfiguration>(configSection);
+//var baseUrlConfig = configSection.Get<BaseUrlConfiguration>();
+//builder.Services.AddCorsPolicy(CORS_POLICY, baseUrlConfig!);
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(CORS_POLICY, policy =>
+    {
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 
 builder.Services.AddControllers();
 
