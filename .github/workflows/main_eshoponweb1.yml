@@ -23,8 +23,11 @@ jobs:
         with:
           dotnet-version: '10.x'
 
-      - name: Build with dotnet
-        run: dotnet build "./src/Web/Web.csproj" --configuration Release
+#      - name: Build with dotnet
+#        run: dotnet build "./src/Web/Web.csproj" --configuration Release
+
+      - name: List publish output
+        run: dir "./src/Web/Release"
 
       - name: dotnet publish
         run: dotnet publish "./src/Web/Web.csproj" -c Release -o "./src/Web/Release"
