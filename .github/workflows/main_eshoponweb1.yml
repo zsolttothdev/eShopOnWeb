@@ -58,6 +58,14 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_FB42EEF51F4045C49E5A3BD87C595FE1 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_11BD281F901244BBAB10A4B90B1F5F77 }}
 
+      - name: Show deployment files
+        shell: powershell
+        run: |
+          Write-Host "CURRENT DIRECTORY:"
+          Get-Location
+          Write-Host "FILES:"
+          Get-ChildItem -Recurse ./publish
+
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
