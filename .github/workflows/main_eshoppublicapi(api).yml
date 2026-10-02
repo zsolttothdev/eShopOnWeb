@@ -24,16 +24,16 @@ jobs:
           dotnet-version: '10.x'
 
       - name: Build with dotnet
-        run: dotnet build --configuration Release
+        run: dotnet build "./src/PublicApi/PublicApi.csproj" --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o "./src/PublicApi/PublicApi.csproj"
+        run: dotnet publish "./src/PublicApi/PublicApi.csproj" -c Release -o "./src/PublicApi/Release"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
-          path: ./src/PublicApi/PublicApi.csproj
+          path: ./src/PublicApi/Release
 
   deploy:
     runs-on: windows-latest
@@ -61,5 +61,5 @@ jobs:
         with:
           app-name: 'eshoppublicapi'
           slot-name: 'api'
-          package: .
+          package: ./src/PublicApi/Release
           
