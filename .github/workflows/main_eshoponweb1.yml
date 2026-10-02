@@ -64,7 +64,7 @@ jobs:
           Write-Host "CURRENT DIRECTORY:"
           Get-Location
           Write-Host "FILES:"
-          Get-ChildItem -Recurse ./publish
+          Get-ChildItem ./publish -File | Select-Object Name
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
