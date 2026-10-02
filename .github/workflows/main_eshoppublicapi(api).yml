@@ -47,7 +47,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: .net-app
-          path: ./src/PublicApi/Release
+          path: ./publish
       
       - name: Login to Azure
         uses: azure/login@v2
@@ -62,5 +62,5 @@ jobs:
         with:
           app-name: 'eshoppublicapi'
           slot-name: 'api'
-          package: ./src/PublicApi/Release
+          package: ./publish
           
