@@ -72,5 +72,5 @@ jobs:
         with:
           app-name: 'eShopOnWeb1'
           slot-name: 'Production'
-          path: ./publish
+          package: ./publish
           
