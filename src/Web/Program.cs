@@ -13,7 +13,7 @@ using NimblePros.Metronome;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add service defaults & Aspire components.
-builder.AddAspireServiceDefaults();
+//builder.AddAspireServiceDefaults();
 
 builder.Services.AddDatabaseContexts(builder.Environment, builder.Configuration);
 
