@@ -3,18 +3,20 @@ services:
  eshopwebmvc:
    environment:
      - ASPNETCORE_ENVIRONMENT=Docker
-     - ASPNETCORE_URLS=http://+:8080
+     - ASPNETCORE_URLS=http://+:9090
+     - baseUrls__apiBase=http://eshoppublicapi:9090
    ports:
-     - "5106:8080"
+     - "5107:9090"
    volumes:
      - ~/.aspnet/https:/root/.aspnet/https:ro
      - ~/.microsoft/usersecrets:/root/.microsoft/usersecrets:ro
  eshoppublicapi:
    environment:
      - ASPNETCORE_ENVIRONMENT=Docker
-     - ASPNETCORE_URLS=http://+:8080
+     - ASPNETCORE_URLS=http://+:7070
+     - baseUrls__apiBase=http://eshoppublicapi:9090
    ports:
-     - "5200:8080"
+     - "5200:7070"
    volumes:
      - ~/.aspnet/https:/root/.aspnet/https:ro
      - ~/.microsoft/usersecrets:/root/.microsoft/usersecrets:ro

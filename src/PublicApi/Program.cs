@@ -20,9 +20,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddAspireServiceDefaults();
 
 builder.Services.AddFastEndpoints();
-
 // Use to force loading of appsettings.json of test project
-builder.Configuration.AddConfigurationFile("appsettings.test.json");
+//builder.Configuration.AddConfigurationFile("appsettings.test.json");
+builder.Configuration.AddEnvironmentVariables();
 
 builder.Services.ConfigureLocalDatabaseContexts(builder.Configuration);
 
