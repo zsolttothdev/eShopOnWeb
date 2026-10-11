@@ -9,13 +9,10 @@ using Microsoft.eShopWeb.Web.Areas.Identity.Helpers;
 using Microsoft.eShopWeb.Web.Configuration;
 using Microsoft.eShopWeb.Web.Extensions;
 using NimblePros.Metronome;
-using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add service defaults & Aspire components.
-
-builder.Configuration.AddEnvironmentVariables();
 builder.AddAspireServiceDefaults();
 
 builder.Services.AddDatabaseContexts(builder.Environment, builder.Configuration);
@@ -118,29 +115,7 @@ app.UseCustomHealthChecks();
 app.UseTroubleshootingMiddlewares();
 
 app.UseHttpsRedirection();
-
-
-app.Use(async (ctx, next) =>
-{
-    if (!ctx.Request.Path.Equals("/appsettings.json", StringComparison.OrdinalIgnoreCase))
-    {
-        await next();
-        return;
-    }
-
-    var apiBase = builder.Configuration["baseUrls:apiBase"]
-        ?? throw new InvalidOperationException("baseUrls__apiBase nincs beállítva");
-
-    ctx.Response.Headers.CacheControl = "no-store";
-    await ctx.Response.WriteAsJsonAsync(new
-    {
-        baseUrls = new { apiBase, webBase = $"{ctx.Request.Scheme}://{ctx.Request.Host}/" },
-        Logging = new { LogLevel = new { Default = "Warning" } }
-    });
-});
-
 app.UseBlazorFrameworkFiles();
-
 app.UseStaticFiles();
 app.UseRouting();
 
@@ -156,5 +131,4 @@ app.MapHealthChecks("api_health_check", new HealthCheckOptions { Predicate = che
 app.MapFallbackToFile("index.html");
 
 app.Logger.LogInformation("LAUNCHING");
-
 app.Run();
