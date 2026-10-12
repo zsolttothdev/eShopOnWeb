@@ -24,9 +24,6 @@ jobs:
         with:
           dotnet-version: '10.x'
 
-      - name: Install Application Insights NuGet package
-        run: dotnet add "./src/PublicApi/PublicApi.csproj" package Microsoft.ApplicationInsights.AspNetCore
-        
 #      - name: Build with dotnet
 #        run: dotnet build "./src/PublicApi/PublicApi.csproj" --configuration Release
 
