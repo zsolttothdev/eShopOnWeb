@@ -5,6 +5,8 @@ using BlazorShared.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.eShopWeb.ApplicationCore.Exceptions;
 using Microsoft.Extensions.Logging;
+using Microsoft.ApplicationInsights;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.eShopWeb.PublicApi.Middleware;
 
@@ -27,6 +29,12 @@ public class ExceptionMiddleware
         }
         catch (Exception ex)
         {
+            
+            _logger.LogError(ex, "Unhandled exception caught by middleware: {Message}", ex.Message);
+
+            var telemetryClient = httpContext.RequestServices.GetService<TelemetryClient>();
+            telemetryClient?.TrackException(ex);
+
             await HandleExceptionAsync(httpContext, ex);        
         }
     }
