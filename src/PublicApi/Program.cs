@@ -16,15 +16,23 @@ using NimblePros.Metronome;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddApplicationInsightsTelemetry();
+
+var appInsightsConnectionString = builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"];
+if (!string.IsNullOrEmpty(appInsightsConnectionString))
+{
+    builder.Services.AddApplicationInsightsTelemetry(options =>
+    {
+        options.ConnectionString = appInsightsConnectionString;
+    });
+}
 
 // Add service defaults & Aspire components.
 builder.AddAspireServiceDefaults();
 
 builder.Services.AddFastEndpoints();
 // Use to force loading of appsettings.json of test project
-//builder.Configuration.AddConfigurationFile("appsettings.test.json");
-builder.Configuration.AddEnvironmentVariables();
+builder.Configuration.AddConfigurationFile("appsettings.test.json");
+//builder.Configuration.AddEnvironmentVariables();
 
 builder.Services.ConfigureLocalDatabaseContexts(builder.Configuration);
 
@@ -67,10 +75,17 @@ builder.Services.AddSwagger();
 builder.Services.AddMetronome();
 string seqUrl = builder.Configuration["Seq:ServerUrl"] ?? "http://localhost:5341";
 
-builder.AddSeqEndpoint(connectionName: "seq", options =>
+
+if (builder.Configuration.GetValue<bool>("Seq:Enabled"))
 {
-    options.ServerUrl = seqUrl;
-});
+    builder.AddSeqEndpoint(
+        connectionName: "seq", 
+        options => {
+            options.ServerUrl = seqUrl;
+        }
+    );
+}
+
 
 var app = builder.Build();
 
