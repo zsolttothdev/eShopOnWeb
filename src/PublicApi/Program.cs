@@ -24,6 +24,8 @@ if (!string.IsNullOrEmpty(appInsightsConnectionString))
     {
         options.ConnectionString = appInsightsConnectionString;
     });
+    
+    builder.Logging.AddFilter<ApplicationInsightsLoggerProvider>("", LogLevel.Information);
 }
 
 // Add service defaults & Aspire components.
