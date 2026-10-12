@@ -116,6 +116,9 @@ app.UseFastEndpoints();
 app.UseSwaggerGen();
 
 app.Logger.LogInformation("LAUNCHING PublicApi");
+
+throw new Exception("Cannot move further"); 
+
 app.Run();
 
 public partial class Program { }
