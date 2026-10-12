@@ -14,6 +14,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NimblePros.Metronome;
 using Microsoft.Extensions.Logging.ApplicationInsights;
+using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
