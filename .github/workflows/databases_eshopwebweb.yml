@@ -9,9 +9,10 @@ on:
       - 'databases'
   workflow_dispatch:
 
+
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     permissions:
       contents: read #This is required for actions/checkout
 
@@ -23,17 +24,20 @@ jobs:
         with:
           dotnet-version: '10.x'
 
-      - name: Build with dotnet
-        run: dotnet build --configuration Release
+#      - name: Build with dotnet
+#        run: dotnet build "./src/Web/Web.csproj" --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+        run: dotnet publish "./src/Web/Web.csproj" -c Release -o "./src/Web/Release"
+
+      - name: List publish output
+        run: dir "./src/Web/Release"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
-          path: ${{env.DOTNET_ROOT}}/myapp
+          path: ./src/Web/Release
 
   deploy:
     runs-on: ubuntu-latest
@@ -61,5 +65,5 @@ jobs:
         with:
           app-name: 'eShopWebWeb'
           slot-name: 'Production'
-          package: .
+          package: ./publish
           
