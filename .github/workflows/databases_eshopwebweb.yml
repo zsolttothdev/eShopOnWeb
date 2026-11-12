@@ -40,7 +40,7 @@ jobs:
           path: ./src/Web/Release
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     needs: build
     permissions:
       id-token: write #This is required for requesting the JWT
