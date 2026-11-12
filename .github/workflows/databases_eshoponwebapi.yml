@@ -8,6 +8,7 @@ on:
     branches:
       - 'databases'
   workflow_dispatch:
+
 jobs:
   build:
     runs-on: windows-latest
@@ -22,20 +23,20 @@ jobs:
         with:
           dotnet-version: '10.x'
 
-#      - name: Build with dotnet
-#        run: dotnet build "./src/PublicApi/PublicApi.csproj" --configuration Release
+      - name: Build with dotnet
+        run: dotnet build --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish "./src/PublicApi/PublicApi.csproj" -c Release -o "./src/PublicApi/Release"
+        run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
-          path: ./src/PublicApi/Release
+          path: ${{env.DOTNET_ROOT}}/myapp
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     needs: build
     permissions:
       id-token: write #This is required for requesting the JWT
@@ -46,14 +47,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: .net-app
-          path: ./publish
       
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_362A97AEA2AC4BCA9C5F63C9255CB621 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_3428F25A6095469DAC49896FA961D459 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_5DE963143FA24798891FB7F72EB395C1 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_99129E61845A46CB9EF3E05A33753902 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_A8EFB817518546DA9D3EFD60B3E4E8C7 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_C0E1B26F2DDF44549572DFFA71D11B97 }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
@@ -61,5 +61,5 @@ jobs:
         with:
           app-name: 'eShopOnWebApi'
           slot-name: 'Production'
-          package: ./publish
+          package: .
           
