@@ -17,6 +17,26 @@ builder.AddAspireServiceDefaults();
 
 builder.Services.AddDatabaseContexts(builder.Environment, builder.Configuration);
 
+var catalogConn = builder.Configuration.GetConnectionString("CatalogConnection");
+if (!string.IsNullOrEmpty(catalogConn))
+{
+    app.Logger.LogInformation("CatalogConnection successfully loaded from Key Vault configuration.");
+}
+else
+{
+    app.Logger.LogWarning("CatalogConnection is EMPTY or could not be resolved!");
+}
+
+var identityConn = builder.Configuration.GetConnectionString("IdentityConnection");
+if (!string.IsNullOrEmpty(identityConn))
+{
+    app.Logger.LogInformation("IdentityConnection successfully loaded from Key Vault configuration.");
+}
+else
+{
+    app.Logger.LogWarning("IdentityConnection is EMPTY or could not be resolved!");
+}
+
 builder.Services.AddCookieSettings();
 builder.Services.AddCookieAuthentication();
 
