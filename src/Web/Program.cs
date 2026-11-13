@@ -21,26 +21,6 @@ builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 
-var catalogConn = builder.Configuration.GetConnectionString("CatalogConnection");
-if (!string.IsNullOrEmpty(catalogConn))
-{
-    app.Logger.LogInformation("CatalogConnection successfully loaded from Key Vault configuration.");
-}
-else
-{
-    app.Logger.LogWarning("CatalogConnection is EMPTY or could not be resolved!");
-}
-
-var identityConn = builder.Configuration.GetConnectionString("IdentityConnection");
-if (!string.IsNullOrEmpty(identityConn))
-{
-    app.Logger.LogInformation("IdentityConnection successfully loaded from Key Vault configuration.");
-}
-else
-{
-    app.Logger.LogWarning("IdentityConnection is EMPTY or could not be resolved!");
-}
-
 builder.Services.AddCookieSettings();
 builder.Services.AddCookieAuthentication();
 
@@ -118,6 +98,29 @@ if (builder.Configuration.GetValue<bool>("Seq:Enabled"))
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 var app = builder.Build();
+
+
+
+var catalogConn = builder.Configuration.GetConnectionString("CatalogConnection");
+if (!string.IsNullOrEmpty(catalogConn))
+{
+    app.Logger.LogInformation("CatalogConnection successfully loaded from Key Vault configuration.");
+}
+else
+{
+    app.Logger.LogWarning("CatalogConnection is EMPTY or could not be resolved!");
+}
+
+var identityConn = builder.Configuration.GetConnectionString("IdentityConnection");
+if (!string.IsNullOrEmpty(identityConn))
+{
+    app.Logger.LogInformation("IdentityConnection successfully loaded from Key Vault configuration.");
+}
+else
+{
+    app.Logger.LogWarning("IdentityConnection is EMPTY or could not be resolved!");
+}
+
 
 app.Logger.LogInformation("App created...");
 
