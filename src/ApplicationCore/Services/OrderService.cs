@@ -1,5 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Ardalis.GuardClauses;
 using Mediator;
@@ -9,8 +14,6 @@ using Microsoft.eShopWeb.ApplicationCore.Entities.OrderAggregate;
 using Microsoft.eShopWeb.ApplicationCore.Entities.OrderAggregate.Events;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using Microsoft.eShopWeb.ApplicationCore.Specifications;
-using System.Net.Http;
-using System.Net.Http.Json;
 
 namespace Microsoft.eShopWeb.ApplicationCore.Services;
 
@@ -74,9 +77,7 @@ public class OrderService : IOrderService
                 )
                 .ToList(),
             FinalPrice: order.Total());
-
-        string jsonBody = $"{{\"itemId\": {itemId}, \"quantity\": {quantity}}}";
-    
+   
 
         var functionUrl = Environment.GetEnvironmentVariable("AZURE_FUNCTION_URL");
         var subscriptionKey = Environment.GetEnvironmentVariable("AZURE_FUNCTION_API_KEY");
