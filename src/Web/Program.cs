@@ -19,7 +19,7 @@ builder.Services.AddDatabaseContexts(builder.Environment, builder.Configuration)
 
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
-builder.Logging.AddAzureWebAppDiagnostics();
+//builder.Logging.AddAzureWebAppDiagnostics();
 
 builder.Services.AddCookieSettings();
 builder.Services.AddCookieAuthentication();

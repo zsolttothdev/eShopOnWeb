@@ -28,7 +28,7 @@ builder.Services.ConfigureLocalDatabaseContexts(builder.Configuration);
 
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
-builder.Logging.AddAzureWebAppDiagnostics();
+//builder.Logging.AddAzureWebAppDiagnostics();
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
         .AddRoles<IdentityRole>()
