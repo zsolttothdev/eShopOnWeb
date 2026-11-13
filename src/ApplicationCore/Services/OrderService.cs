@@ -66,6 +66,10 @@ public class OrderService : IOrderService
         await _orderRepository.AddAsync(order);
         OrderCreatedEvent orderCreatedEvent = new OrderCreatedEvent(order);
         await _mediator.Publish(orderCreatedEvent);
+   
+
+        var functionUrl = Environment.GetEnvironmentVariable("AZURE_FUNCTION_URL");
+        var subscriptionKey = Environment.GetEnvironmentVariable("AZURE_FUNCTION_API_KEY");
 
         var payload = new OrderPayload(
             ShippingAddress: FormatAddress(order.ShipToAddress),
@@ -77,16 +81,14 @@ public class OrderService : IOrderService
                 )
                 .ToList(),
             FinalPrice: order.Total());
-   
 
-        var functionUrl = Environment.GetEnvironmentVariable("AZURE_FUNCTION_URL");
-        var subscriptionKey = Environment.GetEnvironmentVariable("AZURE_FUNCTION_API_KEY");
+        var json = JsonSerializer.Serialize(payload);
 
         //if (!string.IsNullOrEmpty(functionUrl))
         //{
             var request = new HttpRequestMessage(HttpMethod.Post, functionUrl);
             //request.Content = JsonContent.Create(orderPayload);
-            request.Content = JsonContent.Create(payload);
+            request.Content = new StringContent(json, Encoding.UTF8, "application/json");
             //request.Headers.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
             request.Headers.Add("x-functions-key", subscriptionKey);
 
