@@ -87,7 +87,8 @@ public class OrderService : IOrderService
             var request = new HttpRequestMessage(HttpMethod.Post, functionUrl);
             //request.Content = JsonContent.Create(orderPayload);
             request.Content = JsonContent.Create(payload);
-            request.Headers.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
+            //request.Headers.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
+            request.Headers.Add("x-functions-key", subscriptionKey);
 
             var response = await _httpClient.SendAsync(request);
 
