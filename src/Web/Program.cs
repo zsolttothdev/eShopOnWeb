@@ -17,9 +17,9 @@ builder.AddAspireServiceDefaults();
 
 builder.Services.AddDatabaseContexts(builder.Environment, builder.Configuration);
 
-builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
+builder.Logging.AddAzureWebAppDiagnostics();
 
 builder.Services.AddCookieSettings();
 builder.Services.AddCookieAuthentication();
