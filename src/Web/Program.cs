@@ -17,6 +17,10 @@ builder.AddAspireServiceDefaults();
 
 builder.Services.AddDatabaseContexts(builder.Environment, builder.Configuration);
 
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+
 var catalogConn = builder.Configuration.GetConnectionString("CatalogConnection");
 if (!string.IsNullOrEmpty(catalogConn))
 {
