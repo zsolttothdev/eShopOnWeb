@@ -64,11 +64,16 @@ public class OrderService : IOrderService
         OrderCreatedEvent orderCreatedEvent = new OrderCreatedEvent(order);
         await _mediator.Publish(orderCreatedEvent);
 
-        var orderPayload = new 
-        {
-            itemId = order.OrderItems.FirstOrDefault()?.ItemOrdered.CatalogItemId,
-            quantity = order.OrderItems.FirstOrDefault()?.Units
-        };
+        var payload = new OrderPayload(
+            ShippingAddress: FormatAddress(order.ShipToAddress),
+            Items: order.OrderItems
+                .Select(oi => new OrderPayloadItem(
+                    ItemId: oi.ItemOrdered.CatalogItemId,
+                    Quantity: oi.Units
+                )
+                .ToList(),
+            FinalPrice: order.Total()
+        );
 
         var itemId = order.OrderItems.FirstOrDefault()?.ItemOrdered.CatalogItemId;
         var quantity = order.OrderItems.FirstOrDefault()?.Units;
@@ -95,4 +100,20 @@ public class OrderService : IOrderService
             }
         //}
     }
+
+    
+
+    private static string FormatAddress(Address address) =>
+        string.Join(", ", new[] { address.Street, address.City, address.State, address.ZipCode, address.Country }
+            .Where(part => !string.IsNullOrWhiteSpace(part)));
+
+    private sealed record OrderPayload(
+        [property: JsonPropertyName("shipping_address")] string ShippingAddress,
+        [property: JsonPropertyName("items")] List<OrderPayloadItem> Items,
+        [property: JsonPropertyName("final_price")] decimal FinalPrice);
+
+    private sealed record OrderPayloadItem(
+        [property: JsonPropertyName("item_id")] int ItemId,
+        [property: JsonPropertyName("quantity")] int Quantity
+    );
 }
