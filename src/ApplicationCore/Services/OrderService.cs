@@ -68,15 +68,12 @@ public class OrderService : IOrderService
             ShippingAddress: FormatAddress(order.ShipToAddress),
             Items: order.OrderItems
                 .Select(oi => new OrderPayloadItem(
-                    ItemId: oi.ItemOrdered.CatalogItemId,
-                    Quantity: oi.Units
+                        ItemId: oi.ItemOrdered.CatalogItemId,
+                        Quantity: oi.Units
+                    )
                 )
                 .ToList(),
-            FinalPrice: order.Total()
-        );
-
-        var itemId = order.OrderItems.FirstOrDefault()?.ItemOrdered.CatalogItemId;
-        var quantity = order.OrderItems.FirstOrDefault()?.Units;
+            FinalPrice: order.Total());
 
         string jsonBody = $"{{\"itemId\": {itemId}, \"quantity\": {quantity}}}";
     
@@ -87,9 +84,8 @@ public class OrderService : IOrderService
         //if (!string.IsNullOrEmpty(functionUrl))
         //{
             var request = new HttpRequestMessage(HttpMethod.Post, functionUrl);
-
             //request.Content = JsonContent.Create(orderPayload);
-            request.Content = new StringContent(jsonBody, System.Text.Encoding.UTF8, "application/json");
+            request.Content = JsonContent.Create(payload);
             request.Headers.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
 
             var response = await _httpClient.SendAsync(request);
