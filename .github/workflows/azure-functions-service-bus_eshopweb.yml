@@ -63,8 +63,7 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'eShopOnWeb'
+          app-name: 'eShopWeb'
           slot-name: 'Production'
-          resource-group: 'azure-developer-course'
           package: ./publish
           
