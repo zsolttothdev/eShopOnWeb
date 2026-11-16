@@ -76,7 +76,7 @@ public class OrderService : IOrderService
         string jsonBody = $"{{\"itemId\": {itemId}, \"quantity\": {quantity}}}";
     
 
-        var functionUrl = Environment.GetEnvironmentVariable("AZURE_FUNCTION_URL");
+       /* var functionUrl = Environment.GetEnvironmentVariable("AZURE_FUNCTION_URL");
         var subscriptionKey = Environment.GetEnvironmentVariable("AZURE_FUNCTION_API_KEY");
 
         //if (!string.IsNullOrEmpty(functionUrl))
@@ -94,5 +94,6 @@ public class OrderService : IOrderService
                 throw new Exception($"Error occured: {response.StatusCode}");
             }
         //}
+        */
     }
 }
