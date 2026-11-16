@@ -61,7 +61,7 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'eShopOnPublicApi'
+          app-name: 'eShopPublicApi'
           slot-name: 'Production'
           package: ./publish
           
