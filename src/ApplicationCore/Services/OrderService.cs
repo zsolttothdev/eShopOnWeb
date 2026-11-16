@@ -73,7 +73,7 @@ public class OrderService : IOrderService
         var itemId = order.OrderItems.FirstOrDefault()?.ItemOrdered.CatalogItemId;
         var quantity = order.OrderItems.FirstOrDefault()?.Units;
 
-        string jsonBody = $"{{\"itemId\": {itemId}, \"quantity\": {quantity}}}";
+        string jsonBody = $"{{\"order\": {{\"itemId\": {itemId}, \"quantity\": {quantity}}}}}";
     
 
        var functionUrl = Environment.GetEnvironmentVariable("AZURE_FUNCTION_URL");
