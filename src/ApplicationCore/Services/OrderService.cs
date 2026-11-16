@@ -76,8 +76,8 @@ public class OrderService : IOrderService
         string jsonBody = $"{{\"itemId\": {itemId}, \"quantity\": {quantity}}}";
     
 
-       /* var functionUrl = Environment.GetEnvironmentVariable("AZURE_FUNCTION_URL");
-        var subscriptionKey = Environment.GetEnvironmentVariable("AZURE_FUNCTION_API_KEY");
+       var functionUrl = Environment.GetEnvironmentVariable("AZURE_FUNCTION_URL");
+       var subscriptionKey = Environment.GetEnvironmentVariable("AZURE_FUNCTION_API_KEY");
 
         //if (!string.IsNullOrEmpty(functionUrl))
         //{
@@ -85,7 +85,7 @@ public class OrderService : IOrderService
 
             //request.Content = JsonContent.Create(orderPayload);
             request.Content = new StringContent(jsonBody, System.Text.Encoding.UTF8, "application/json");
-            request.Headers.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
+            request.Headers.Add("x-functions-key", subscriptionKey);
 
             var response = await _httpClient.SendAsync(request);
 
@@ -94,6 +94,5 @@ public class OrderService : IOrderService
                 throw new Exception($"Error occured: {response.StatusCode}");
             }
         //}
-        */
     }
 }
