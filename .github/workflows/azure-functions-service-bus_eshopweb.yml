@@ -65,5 +65,6 @@ jobs:
         with:
           app-name: 'eShopOnWeb'
           slot-name: 'Production'
+          resource-group: 'azure-developer-course'
           package: ./publish
           
