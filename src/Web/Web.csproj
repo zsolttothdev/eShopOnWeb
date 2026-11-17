@@ -13,7 +13,7 @@
   <ItemGroup>
     <Content Remove="compilerconfig.json" />
   </ItemGroup>
-
+ 
   <ItemGroup>
     <PackageReference Include="Ardalis.ListStartupServices" />
     <PackageReference Include="Ardalis.Specification" />
