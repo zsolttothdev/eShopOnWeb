@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Ardalis.GuardClauses;
+using Azure.Messaging.ServiceBus;
 using Mediator;
 using Microsoft.eShopWeb.ApplicationCore.Entities;
 using Microsoft.eShopWeb.ApplicationCore.Entities.BasketAggregate;
@@ -22,13 +23,15 @@ public class OrderService : IOrderService
     private readonly IRepository<CatalogItem> _itemRepository;
     private readonly IMediator _mediator;
     private readonly HttpClient _httpClient;
+    private readonly ServiceBusSender _orderQueueSender;
 
     public OrderService(IRepository<Basket> basketRepository,
         IRepository<CatalogItem> itemRepository,
         IRepository<Order> orderRepository,
-        IUriComposer uriComposer, 
+        IUriComposer uriComposer,
         IMediator mediator,
-        HttpClient httpClient
+        HttpClient httpClient,
+        ServiceBusSender orderQueueSender
     )
     {
         _orderRepository = orderRepository;
@@ -37,6 +40,7 @@ public class OrderService : IOrderService
         _itemRepository = itemRepository;
         _mediator = mediator;
         _httpClient = httpClient;
+        _orderQueueSender = orderQueueSender;
     }
 
     public async Task CreateOrderAsync(int basketId, Address shippingAddress)
@@ -61,38 +65,23 @@ public class OrderService : IOrderService
         var order = new Order(basket.BuyerId, shippingAddress, items);
 
         await _orderRepository.AddAsync(order);
-        OrderCreatedEvent orderCreatedEvent = new OrderCreatedEvent(order);
-        await _mediator.Publish(orderCreatedEvent);
+        await _mediator.Publish(new OrderCreatedEvent(order));
 
-        var orderPayload = new 
+        var orderPayload = new
         {
-            itemId = order.OrderItems.FirstOrDefault()?.ItemOrdered.CatalogItemId,
-            quantity = order.OrderItems.FirstOrDefault()?.Units
+            order = new
+            {
+                itemId = order.OrderItems.FirstOrDefault()?.ItemOrdered.CatalogItemId,
+                quantity = order.OrderItems.FirstOrDefault()?.Units
+            }
         };
 
-        var itemId = order.OrderItems.FirstOrDefault()?.ItemOrdered.CatalogItemId;
-        var quantity = order.OrderItems.FirstOrDefault()?.Units;
+        var message = new ServiceBusMessage(BinaryData.FromObjectAsJson(orderPayload))
+        {
+            ContentType = "application/json",
+            MessageId = order.Id.ToString()
+        };
 
-        string jsonBody = $"{{\"order\": {{\"itemId\": {itemId}, \"quantity\": {quantity}}}}}";
-    
-
-       var functionUrl = Environment.GetEnvironmentVariable("AZURE_FUNCTION_URL");
-       var subscriptionKey = Environment.GetEnvironmentVariable("AZURE_FUNCTION_API_KEY");
-
-        //if (!string.IsNullOrEmpty(functionUrl))
-        //{
-            var request = new HttpRequestMessage(HttpMethod.Post, functionUrl);
-
-            //request.Content = JsonContent.Create(orderPayload);
-            request.Content = new StringContent(jsonBody, System.Text.Encoding.UTF8, "application/json");
-            request.Headers.Add("x-functions-key", subscriptionKey);
-
-            var response = await _httpClient.SendAsync(request);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception($"Error occured: {response.StatusCode}");
-            }
-        //}
+        await _orderQueueSender.SendMessageAsync(message);
     }
 }

@@ -9,6 +9,7 @@
 		<PackageReference Include="Ardalis.GuardClauses" />
 		<PackageReference Include="Ardalis.Result" />
 		<PackageReference Include="Ardalis.Specification" />
+  		<PackageReference Include="Azure.Messaging.ServiceBus" />
     <PackageReference Include="Mediator.Abstractions" />
     <PackageReference Include="NimblePros.SharedKernel" />
 	</ItemGroup>

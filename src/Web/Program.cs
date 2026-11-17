@@ -9,6 +9,8 @@ using Microsoft.eShopWeb.Web.Areas.Identity.Helpers;
 using Microsoft.eShopWeb.Web.Configuration;
 using Microsoft.eShopWeb.Web.Extensions;
 using NimblePros.Metronome;
+using Azure.Identity;
+using Azure.Messaging.ServiceBus;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +26,16 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
            .AddDefaultUI()
            .AddEntityFrameworkStores<AppIdentityDbContext>()
            .AddDefaultTokenProviders();
+
+var sbConnectionString = builder.Configuration["ServiceBus:ConnectionString"];
+var sbNamespace = builder.Configuration["ServiceBus:FullyQualifiedNamespace"];
+var sbQueueName = builder.Configuration["ServiceBus:QueueName"] ?? "createorderqueue";
+
+builder.Services.AddSingleton(_ => !string.IsNullOrEmpty(sbConnectionString)
+    ? new ServiceBusClient(sbConnectionString)
+    : new ServiceBusClient(sbNamespace, new DefaultAzureCredential()));
+
+builder.Services.AddSingleton(sp => sp.GetRequiredService<ServiceBusClient>().CreateSender(sbQueueName));
 
 var gitHubClientId = builder.Configuration["GitHub:ClientId"] ?? string.Empty;
 
