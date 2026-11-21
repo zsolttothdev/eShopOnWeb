@@ -67,21 +67,23 @@ public class OrderService : IOrderService
         await _orderRepository.AddAsync(order);
         await _mediator.Publish(new OrderCreatedEvent(order));
 
-        var orderPayload = new
-        {
-            order = new
-            {
-                itemId = order.OrderItems.FirstOrDefault()?.ItemOrdered.CatalogItemId,
-                quantity = order.OrderItems.FirstOrDefault()?.Units
-            }
-        };
-
-        var message = new ServiceBusMessage(BinaryData.FromObjectAsJson(orderPayload))
-        {
-            ContentType = "application/json",
-            MessageId = order.Id.ToString()
-        };
 
         await _orderQueueSender.SendMessageAsync(message);
+
+        var functionUrl = Environment.GetEnvironmentVariable("AZURE_FUNCTION_URL");
+        var subscriptionKey = Environment.GetEnvironmentVariable("AZURE_FUNCTION_API_KEY");
+
+        var request = new HttpRequestMessage(HttpMethod.Post, functionUrl)
+        {
+            Content = JsonContent.Create(orderPayload)
+        };
+        request.Headers.Add("x-functions-key", subscriptionKey);
+
+        var response = await _httpClient.SendAsync(request);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception($"Error occured: {response.StatusCode}");
+        }
     }
 }
