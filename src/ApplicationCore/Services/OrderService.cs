@@ -67,16 +67,27 @@ public class OrderService : IOrderService
         await _orderRepository.AddAsync(order);
         await _mediator.Publish(new OrderCreatedEvent(order));
 
+        var payload = new OrderPayload(
+            ShippingAddress: FormatAddress(order.ShipToAddress),
+            Items: order.OrderItems
+                .Select(oi => new OrderPayloadItem(
+                        ItemId: oi.ItemOrdered.CatalogItemId,
+                        Quantity: oi.Units
+                    )
+                )
+                .ToList(),
+            FinalPrice: order.Total());
 
-        await _orderQueueSender.SendMessageAsync(message);
+        var json = JsonSerializer.Serialize(payload);
+
+        await _orderQueueSender.SendMessageAsync(json);
 
         var functionUrl = Environment.GetEnvironmentVariable("AZURE_FUNCTION_URL");
         var subscriptionKey = Environment.GetEnvironmentVariable("AZURE_FUNCTION_API_KEY");
 
-        var request = new HttpRequestMessage(HttpMethod.Post, functionUrl)
-        {
-            Content = JsonContent.Create(orderPayload)
-        };
+        var request = new HttpRequestMessage(HttpMethod.Post, functionUrl);
+
+        request.Content = new StringContent(json, Encoding.UTF8, "application/json");
         request.Headers.Add("x-functions-key", subscriptionKey);
 
         var response = await _httpClient.SendAsync(request);
