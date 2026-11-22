@@ -77,9 +77,9 @@ public class OrderService : IOrderService
             Items: order.OrderItems
                 .Select(oi => new OrderPayloadItem(oi.ItemOrdered.CatalogItemId, oi.Units))
                 .ToList(),
-            FinalPrice: order.Total());
-        }
-        
+            FinalPrice: order.Total())
+        };
+
         var json = JsonSerializer.Serialize(payload);
 
         // Service Bus: ServiceBusMessage kell, nem string
