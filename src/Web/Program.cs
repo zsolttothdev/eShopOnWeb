@@ -36,6 +36,7 @@ builder.Services.AddSingleton(_ => !string.IsNullOrEmpty(sbConnectionString)
     : new ServiceBusClient(sbNamespace, new DefaultAzureCredential()));
 
 builder.Services.AddSingleton(sp => sp.GetRequiredService<ServiceBusClient>().CreateSender(sbQueueName));
+builder.Services.AddHttpClient<IOrderService, OrderService>();
 
 var gitHubClientId = builder.Configuration["GitHub:ClientId"] ?? string.Empty;
 
