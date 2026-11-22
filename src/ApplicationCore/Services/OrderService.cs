@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Ardalis.GuardClauses;
 using Azure.Messaging.ServiceBus;
@@ -10,10 +14,12 @@ using Microsoft.eShopWeb.ApplicationCore.Entities.OrderAggregate;
 using Microsoft.eShopWeb.ApplicationCore.Entities.OrderAggregate.Events;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using Microsoft.eShopWeb.ApplicationCore.Specifications;
-using System.Net.Http;
-using System.Net.Http.Json;
 
 namespace Microsoft.eShopWeb.ApplicationCore.Services;
+
+public record OrderPayloadItem(int ItemId, int Quantity);
+
+public record OrderPayload(string ShippingAddress, List<OrderPayloadItem> Items, decimal FinalPrice);
 
 public class OrderService : IOrderService
 {
@@ -31,8 +37,7 @@ public class OrderService : IOrderService
         IUriComposer uriComposer,
         IMediator mediator,
         HttpClient httpClient,
-        ServiceBusSender orderQueueSender
-    )
+        ServiceBusSender orderQueueSender)
     {
         _orderRepository = orderRepository;
         _uriComposer = uriComposer;
@@ -58,8 +63,7 @@ public class OrderService : IOrderService
         {
             var catalogItem = catalogItems.First(c => c.Id == basketItem.CatalogItemId);
             var itemOrdered = new CatalogItemOrdered(catalogItem.Id, catalogItem.Name, _uriComposer.ComposePicUri(catalogItem.PictureUri));
-            var orderItem = new OrderItem(itemOrdered, basketItem.UnitPrice, basketItem.Quantity);
-            return orderItem;
+            return new OrderItem(itemOrdered, basketItem.UnitPrice, basketItem.Quantity);
         }).ToList();
 
         var order = new Order(basket.BuyerId, shippingAddress, items);
@@ -70,31 +74,44 @@ public class OrderService : IOrderService
         var payload = new OrderPayload(
             ShippingAddress: FormatAddress(order.ShipToAddress),
             Items: order.OrderItems
-                .Select(oi => new OrderPayloadItem(
-                        ItemId: oi.ItemOrdered.CatalogItemId,
-                        Quantity: oi.Units
-                    )
-                )
+                .Select(oi => new OrderPayloadItem(oi.ItemOrdered.CatalogItemId, oi.Units))
                 .ToList(),
             FinalPrice: order.Total());
 
         var json = JsonSerializer.Serialize(payload);
 
-        await _orderQueueSender.SendMessageAsync(json);
+        // Service Bus: ServiceBusMessage kell, nem string
+        var message = new ServiceBusMessage(json)
+        {
+            ContentType = "application/json"
+        };
+        await _orderQueueSender.SendMessageAsync(message);
 
+        // Azure Function hívás
         var functionUrl = Environment.GetEnvironmentVariable("AZURE_FUNCTION_URL");
-        var subscriptionKey = Environment.GetEnvironmentVariable("AZURE_FUNCTION_API_KEY");
+        var functionKey = Environment.GetEnvironmentVariable("AZURE_FUNCTION_API_KEY");
 
-        var request = new HttpRequestMessage(HttpMethod.Post, functionUrl);
+        Guard.Against.NullOrWhiteSpace(functionUrl, nameof(functionUrl));
 
-        request.Content = new StringContent(json, Encoding.UTF8, "application/json");
-        request.Headers.Add("x-functions-key", subscriptionKey);
+        using var request = new HttpRequestMessage(HttpMethod.Post, functionUrl)
+        {
+            Content = new StringContent(json, Encoding.UTF8, "application/json")
+        };
 
-        var response = await _httpClient.SendAsync(request);
+        if (!string.IsNullOrWhiteSpace(functionKey))
+        {
+            request.Headers.Add("x-functions-key", functionKey);
+        }
+
+        using var response = await _httpClient.SendAsync(request);
 
         if (!response.IsSuccessStatusCode)
         {
-            throw new Exception($"Error occured: {response.StatusCode}");
+            var body = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException($"Function call failed: {(int)response.StatusCode} {response.StatusCode}. {body}");
         }
     }
+
+    private static string FormatAddress(Address address) =>
+        $"{address.Street}, {address.City}, {address.State} {address.ZipCode}, {address.Country}";
 }
