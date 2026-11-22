@@ -71,13 +71,15 @@ public class OrderService : IOrderService
         await _orderRepository.AddAsync(order);
         await _mediator.Publish(new OrderCreatedEvent(order));
 
-        var payload = new OrderPayload(
+        var payload = new {
+            order = new OrderPayload(
             ShippingAddress: FormatAddress(order.ShipToAddress),
             Items: order.OrderItems
                 .Select(oi => new OrderPayloadItem(oi.ItemOrdered.CatalogItemId, oi.Units))
                 .ToList(),
             FinalPrice: order.Total());
-
+        }
+        
         var json = JsonSerializer.Serialize(payload);
 
         // Service Bus: ServiceBusMessage kell, nem string
